@@ -1,6 +1,7 @@
 package org.jfrog.artifactory.client;
 
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.entity.ContentType;
 import org.jfrog.artifactory.client.model.File;
 import org.jfrog.artifactory.client.model.Item;
 import org.jfrog.artifactory.client.model.impl.FolderImpl;
@@ -31,6 +32,29 @@ public class DownloadUploadTests extends ArtifactoryTestsBase {
 
     private static final int SAMPLE_FILE_SIZE = 3044;
     private static final int SAMPLE_FILE_SIZE_WIN_ENDINGS = 3017;
+
+    @Test
+    public void testUploadWithContentTypeChange() throws IOException {
+        InputStream inputStream = this.getClass().getResourceAsStream("/sample.txt");
+        assertNotNull(inputStream);
+        File deployed = artifactory.repository(localRepository.getKey()).upload(PATH, inputStream).withProperty("color", "blue")
+                .withProperty("color", "red")
+                .withContentType(ContentType.DEFAULT_TEXT.getMimeType())
+                .doUpload();
+        assertNotNull(deployed);
+        assertEquals(deployed.getMimeType(), ContentType.DEFAULT_TEXT.getMimeType());
+    }
+
+    @Test
+    public void testUploadWithDefaultContentType() throws IOException {
+        InputStream inputStream = this.getClass().getResourceAsStream("/sample.txt");
+        assertNotNull(inputStream);
+        File deployed = artifactory.repository(localRepository.getKey()).upload(PATH, inputStream).withProperty("color", "blue")
+                .withProperty("color", "red")
+                .doUpload();
+        assertNotNull(deployed);
+        assertEquals(deployed.getMimeType(), ContentType.APPLICATION_OCTET_STREAM.getMimeType());
+    }
 
     @Test
     public void testUploadWithSingleProperty() throws IOException {

@@ -22,6 +22,7 @@ class UploadableArtifactImpl extends ArtifactBase<UploadableArtifact> implements
     private long size = -1
     private ArtifactoryImpl artifactory
     private String sha1
+    private ContentType contentType;
 
     UploadableArtifactImpl(String repo, String path, InputStream content, Artifactory artifactory) {
         super(repo)
@@ -74,7 +75,7 @@ class UploadableArtifactImpl extends ArtifactBase<UploadableArtifact> implements
             headers.put('X-Explode-Archive-Atomic','true')
         }
         long size = file ? file.size() : -1;
-        return artifactory.put("/$repo/$path${params}", ContentType.APPLICATION_OCTET_STREAM, null, headers, content, size, String, null);
+        return artifactory.put("/$repo/$path${params}", getContentType(ContentType.APPLICATION_OCTET_STREAM), null, headers, content, size, String, null);
     }
 
     private uploadContent(params) {
@@ -91,7 +92,7 @@ class UploadableArtifactImpl extends ArtifactBase<UploadableArtifact> implements
             content = new ProgressInputStream(content, size, listener)
         }
 
-        return (org.jfrog.artifactory.client.model.File)artifactory.put("/$repo/$path${params}", ContentType.APPLICATION_OCTET_STREAM, null, headers, content, size, FileImpl, org.jfrog.artifactory.client.model.File);
+        return (org.jfrog.artifactory.client.model.File)artifactory.put("/$repo/$path${params}", getContentType(ContentType.APPLICATION_OCTET_STREAM), null, headers, content, size, FileImpl, org.jfrog.artifactory.client.model.File);
     }
 
     @Override
@@ -148,5 +149,15 @@ class UploadableArtifactImpl extends ArtifactBase<UploadableArtifact> implements
     UploadableArtifact withProperty(String name, Object value) {
         super.withProperty(name, value)
         this
+    }
+
+    @Override
+    UploadableArtifact withContentType(String contentType) {
+        this.contentType = ContentType.getByMimeType(contentType)
+        this
+    }
+
+    private String getContentType(ContentType fallback) {
+        contentType ? contentType : fallback
     }
 }

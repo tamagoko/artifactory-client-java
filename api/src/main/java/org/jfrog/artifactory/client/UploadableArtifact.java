@@ -27,4 +27,6 @@ public interface UploadableArtifact extends Artifact<UploadableArtifact> {
     UploadableArtifact withProperty(String name, Object... values);
 
     UploadableArtifact withProperty(String name, Object value);
+
+    UploadableArtifact withContentType(String contentType);
 }
